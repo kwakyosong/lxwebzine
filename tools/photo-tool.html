@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 정리 도구 · 한경 웹진</title>
+<style>
+:root{--navy:#142C67;--red:#D6403B;--text:#121212;--sub:#585858;--line:#DDDDDD;--pale:#EEF3FA}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,system-ui,"Noto Sans KR","Malgun Gothic",sans-serif;color:var(--text);letter-spacing:-.02em}
+header{padding:16px 24px;border-bottom:1px solid var(--line)}h1{margin:0;font-size:20px;color:#002D74}header p{margin:4px 0 0;font-size:13px;color:var(--sub)}
+main{display:grid;grid-template-columns:340px 1fr;gap:24px;padding:20px 24px;max-width:1280px}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.step{margin-bottom:18px}.step h2{font-size:15px;margin:0 0 8px;color:var(--navy)}
+label{display:block;font-size:13px;margin:6px 0 4px;font-weight:700}select,input[type=text]{width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;font-size:14px}
+#drop{border:2px dashed #BDBDBD;border-radius:8px;padding:22px;text-align:center;font-size:14px;color:var(--sub);cursor:pointer}#drop.on{border-color:var(--navy);background:var(--pale)}
+.info{font-size:13px;color:var(--sub);margin-top:6px}.warn{margin-top:8px;padding:10px;border-radius:6px;background:#FEF5F5;color:#B3261E;font-size:13px;display:none}.ok{background:#EAF4EE;color:#1F7A4D}
+button{width:100%;min-height:44px;border:0;border-radius:400px;background:var(--navy);color:#fff;font-size:15px;font-weight:700;cursor:pointer}button:disabled{background:#BDBDBD;cursor:not-allowed}
+.stage{position:relative;display:inline-block;max-width:100%;user-select:none}.stage img{display:block;max-width:100%;max-height:70vh}
+#box{position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.55);cursor:move}
+.result{margin-top:12px;font-size:13px;line-height:1.7}.result code{background:var(--pale);padding:1px 5px;border-radius:3px}
+textarea{width:100%;height:56px;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:6px}
+</style>
+</head>
+<body>
+<header><h1>사진 정리 도구</h1><p>설치 없이 브라우저에서 쓴다. 사진은 내 컴퓨터 밖으로 나가지 않는다. 규칙: submain.md 8번 이미지 규칙</p></header>
+<main>
+<section>
+  <div class="step"><h2>1. 사진 고르기</h2>
+    <div id="drop">여기에 사진을 끌어다 놓거나 눌러서 고르기</div>
+    <input id="file" type="file" accept="image/*" hidden>
+    <div class="info" id="srcInfo">아직 사진이 없다</div>
+    <div class="warn" id="srcWarn"></div>
+  </div>
+  <div class="step"><h2>2. 어디에 쓸 사진인가</h2>
+    <select id="use"></select>
+    <div class="info" id="useInfo"></div>
+  </div>
+  <div class="step"><h2>3. 파일 이름</h2>
+    <label for="topic">주제 (영문 소문자·숫자·하이픈) — 기사 사진은 글.md의 페이지 이름, 서브메인 사진은 웹진 주제</label><input id="topic" type="text" placeholder="예: jeongbang-story / jeongbang">
+    <label for="part">이름 중간 (장면 이름. 대표 사진·히어로·공유 미리보기는 비운다)</label><input id="part" type="text" placeholder="예: pebble, card1, scene1">
+    <div class="info">만들어질 이름: <b id="fname">-</b></div>
+  </div>
+  <div class="step"><h2>4. 출처 확인</h2>
+    <label for="src">출처 (직접 촬영이면 "직접 촬영(팀번호)")</label><input id="src" type="text" placeholder="예: 직접 촬영(team1) / 한국관광공사 공공누리 제1유형">
+    <label><input id="rights" type="checkbox"> 이 사진을 써도 되는지 확인했다 (워터마크·글자가 없다)</label>
+  </div>
+  <button id="make" disabled>잘라서 저장하기</button>
+  <div class="result" id="result"></div>
+  <label for="credit">credits.txt에 붙여 넣을 한 줄</label><textarea id="credit" readonly></textarea>
+</section>
+<section><div class="info" style="margin-bottom:8px">흰 테두리 상자를 끌어서 남길 부분을 고른다. 상자 밖은 잘린다.</div><div class="stage" id="stage"></div></section>
+</main>
+<script>
+const USES = [
+  {id:'hero-16x9', name:'서브메인 히어로 (PC)', r:[16,9], max:1600, min:1200, kb:500, part:'hero'},
+  {id:'hero-4x5', name:'서브메인 히어로 (모바일)', r:[4,5], max:1080, min:600, kb:500, part:'hero'},
+  {id:'og', name:'공유 미리보기 1200×630', r:[1200,630], max:1200, min:1200, kb:300, part:'og', exact:true},
+  {id:'16x9', name:'기사 대표·본문 사진 16:9', r:[16,9], max:1600, min:500, kb:300},
+  {id:'4x5', name:'세로 사진·카드 4:5', r:[4,5], max:1080, min:300, kb:300},
+  {id:'9x16', name:'풀페이지 장면 9:16', r:[9,16], max:1080, min:720, kb:300},
+  {id:'thumb-16x9', name:'썸네일 16:9 (관련 기사 등)', r:[16,9], max:800, min:300, kb:150},
+];
+const $ = id => document.getElementById(id);
+let img = null, file = null, box = {x:0,y:0,w:0,h:0}, scale = 1;
+USES.forEach(u => { const o = document.createElement('option'); o.value = u.id; o.textContent = u.name; $('use').appendChild(o); });
+const use = () => USES.find(u => u.id === $('use').value);
+const ratioTag = u => u.exact ? '' : '-' + u.r[0] + 'x' + u.r[1];
+function fname(){ const t = $('topic').value.trim(), p = $('part').value.trim(), u = use();
+  const parts = [t, p || u.part || ''].filter(Boolean).join('-');
+  const name = u.exact ? (t ? t + '-og' : '') : (parts ? parts + ratioTag(u) : '');
+  return name ? name + '.jpg' : ''; }
+function validName(n){ return /^[a-z0-9]+(-[a-z0-9]+)*\.jpg$/.test(n); }
+function refresh(){
+  const u = use(); $('useInfo').textContent = '비율 ' + u.r.join(':') + ' · 최대 가로 ' + u.max + 'px · 원본 최소 가로 ' + u.min + 'px · ' + u.kb + 'KB 이하';
+  const n = fname(); $('fname').textContent = n || '-';
+  let warn = '';
+  if (img) { const cw = Math.round(box.w);
+    if (cw < u.min) warn = '사진이 작다: 남길 부분의 가로가 ' + cw + 'px로 이 용도의 최소 ' + u.min + 'px보다 작다. 늘리지 않으므로 화면에서 흐리게 보일 수 있다. 더 큰 사진을 쓰거나 카드·썸네일처럼 작은 자리에 쓴다.'; }
+  $('srcWarn').style.display = warn ? 'block' : 'none'; $('srcWarn').textContent = warn;
+  $('make').disabled = !(img && n && validName(n) && $('rights').checked && $('src').value.trim());
+}
+function setBox(){ if (!img) return; const u = use(); const R = u.r[0] / u.r[1];
+  let w = img.naturalWidth, h = w / R; if (h > img.naturalHeight) { h = img.naturalHeight; w = h * R; }
+  box = {x:(img.naturalWidth - w) / 2, y:(img.naturalHeight - h) / 2, w, h}; draw(); refresh(); }
+function draw(){ const el = $('box'); if (!el) return; scale = img.clientWidth / img.naturalWidth;
+  Object.assign(el.style, {left:box.x*scale+'px', top:box.y*scale+'px', width:box.w*scale+'px', height:box.h*scale+'px'}); }
+function load(f){ if (!f || !f.type.startsWith('image/')) return; file = f; img = null; $('make').disabled = true; $('srcInfo').textContent = '사진을 읽는 중…';
+  const url = URL.createObjectURL(f); const im = new Image();
+  im.onload = () => { $('stage').innerHTML = ''; $('stage').appendChild(im); const b = document.createElement('div'); b.id = 'box'; $('stage').appendChild(b); img = im;
+    $('srcInfo').textContent = f.name + ' · ' + im.naturalWidth + ' × ' + im.naturalHeight + 'px · ' + Math.round(f.size / 1024) + 'KB';
+    let d = null; b.addEventListener('pointerdown', e => { d = {sx:e.clientX, sy:e.clientY, x:box.x, y:box.y}; b.setPointerCapture(e.pointerId); });
+    b.addEventListener('pointermove', e => { if (!d) return; box.x = Math.min(Math.max(0, d.x + (e.clientX - d.sx) / scale), img.naturalWidth - box.w); box.y = Math.min(Math.max(0, d.y + (e.clientY - d.sy) / scale), img.naturalHeight - box.h); draw(); });
+    b.addEventListener('pointerup', () => d = null); setBox(); };
+  im.src = url; }
+async function encode(canvas, kb){ let lo = .5, hi = .92, best = null;
+  for (let i = 0; i < 7; i++) { const q = (lo + hi) / 2; const b = await new Promise(r => canvas.toBlob(r, 'image/jpeg', q));
+    if (b.size <= kb * 1024) { best = {b, q}; lo = q; } else hi = q; }
+  if (!best) { const b = await new Promise(r => canvas.toBlob(r, 'image/jpeg', .5)); best = {b, q:.5}; }
+  return best; }
+$('make').addEventListener('click', async () => {
+  const u = use(); let outW = Math.min(u.max, Math.round(box.w)); let outH = Math.round(outW * u.r[1] / u.r[0]);
+  if (u.exact && box.w >= 1200) { outW = 1200; outH = 630; }
+  const c = document.createElement('canvas'); c.width = outW; c.height = outH; const g = c.getContext('2d');
+  g.imageSmoothingQuality = 'high'; g.drawImage(img, box.x, box.y, box.w, box.h, 0, 0, outW, outH);
+  const {b, q} = await encode(c, u.kb); const n = fname();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = n; document.body.appendChild(a); a.click(); a.remove();
+  const small = box.w < u.min;
+  $('result').innerHTML = '저장: <code>' + n + '</code><br>크기 ' + outW + ' × ' + outH + 'px · ' + Math.round(b.size / 1024) + 'KB (품질 ' + Math.round(q * 100) + ')' + (small ? '<br>⚠ 원본이 작아 늘리지 않고 저장했다' : '');
+  const own = /직접 촬영/.test($('src').value);
+  $('credit').value = n + ' | ' + $('src').value.trim() + ' | ' + (own ? '-' : '라이선스 적기') + ' | ' + (own ? '-' : '원본 주소 적기');
+  window.__last = {name:n, w:outW, h:outH, kb:Math.round(b.size / 1024), small};
+});
+$('drop').addEventListener('click', () => $('file').click());
+$('file').addEventListener('change', e => load(e.target.files[0]));
+['dragover','dragenter'].forEach(t => $('drop').addEventListener(t, e => { e.preventDefault(); $('drop').classList.add('on'); }));
+['dragleave','drop'].forEach(t => $('drop').addEventListener(t, e => { e.preventDefault(); $('drop').classList.remove('on'); }));
+$('drop').addEventListener('drop', e => load(e.dataTransfer.files[0]));
+['use'].forEach(id => $(id).addEventListener('change', setBox));
+['topic','part','src'].forEach(id => $(id).addEventListener('input', refresh)); $('rights').addEventListener('change', refresh);
+window.addEventListener('resize', draw); refresh();
+// 검증용: 상자 위치를 비율(0~1)로 지정
+window.__setFocus = (fx, fy) => { box.x = Math.min(Math.max(0, fx * img.naturalWidth - box.w / 2), img.naturalWidth - box.w); box.y = Math.min(Math.max(0, fy * img.naturalHeight - box.h / 2), img.naturalHeight - box.h); draw(); refresh(); };
+</script>
+</body>
+</html>
