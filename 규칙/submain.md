@@ -7,7 +7,7 @@
 - 실제 주소: `lxwebzine.hankyung.com/teamN/` (한경닷컴이 검수 후 서버에 올린다. 주소 끝의 `/`까지 포함)
 - 역할: 우리 팀 웹진의 첫 페이지이자 **광고 랜딩페이지**. 광고를 눌러 들어온 사람이 첫 화면에서 무엇을 하면 되는지 바로 알 수 있어야 한다. 또 웹진메인은 이 페이지의 내용을 발췌해 보여준다 (7번).
 - 기준: 한경트래블 채널 메인(hankyung.com/travel)의 화면 레이아웃과 색감. (실측)은 한경트래블에서 측정한 값, (제안)은 새로 정한 값이다.
-- 샘플 페이지: 샘플 웹진의 `team1/index.html`
+- 샘플: 강사가 보여 주는 샘플 웹진 (팀 저장소에는 들어 있지 않다. 이 규칙만 따른다)
 
 ### 폴더 구조
 ```
@@ -255,26 +255,26 @@ public/                ← 이 폴더 내용이 그대로 lxwebzine.hankyung.com
 <!-- 히어로: 1개. 발췌 표시는 16:9 <img>에 붙인다 -->
 <section data-excerpt="hero">
   <picture>
-    <source media="(max-width: 767px)" srcset="./images/jeongbang-hero-4x5.jpg">
-    <img data-excerpt="image" src="./images/jeongbang-hero-16x9.jpg" alt="바다로 떨어지는 정방폭포">
+    <source media="(max-width: 767px)" srcset="./images/주제-hero-4x5.jpg">
+    <img data-excerpt="image" src="./images/주제-hero-16x9.jpg" alt="[히어로 사진 설명]">
   </picture>
-  <h1 data-excerpt="title">바다로 떨어지는 폭포를 보러, 서귀포로</h1>
-  <p data-excerpt="lead">높이 23m 물줄기가 바다로 곧장 떨어지는 정방폭포에서 반나절을 보낸다</p>
+  <h1 data-excerpt="title">[우리웹진.md 광고 문구]</h1>
+  <p data-excerpt="lead">[우리웹진.md 리드 한 줄]</p>
 </section>
 
 <!-- 대표 기사(피처 카드): data-featured="true". 날짜가 화면에 안 보여도 date 표시는 넣는다 -->
-<a data-excerpt="article" data-featured="true" href="./articles/jeongbang-view.html">
-  <img data-excerpt="image" src="./images/jeongbang-view-16x9.jpg" alt="...">
-  <span data-excerpt="kicker">시선</span>
-  <h2 data-excerpt="title">정방폭포를 보는 세 가지 시선</h2>
+<a data-excerpt="article" data-featured="true" href="./articles/대표페이지이름.html">
+  <img data-excerpt="image" src="./images/대표페이지이름-16x9.jpg" alt="...">
+  <span data-excerpt="kicker">[카테고리]</span>
+  <h2 data-excerpt="title">[대표 콘텐츠 글.md 제목]</h2>
   <time data-excerpt="date" datetime="2026-10-06" hidden>2026.10.06</time>
 </a>
 
 <!-- 기사 카드: 대표 기사를 뺀 나머지 기사 -->
-<a data-excerpt="article" href="./articles/jeongbang-story.html">
-  <img data-excerpt="image" src="./images/jeongbang-story-16x9.jpg" alt="...">
-  <span data-excerpt="kicker">이야기</span>
-  <h3 data-excerpt="title">바다로 곧장 떨어지는 폭포, 정방폭포</h3>
+<a data-excerpt="article" href="./articles/페이지이름.html">
+  <img data-excerpt="image" src="./images/페이지이름-16x9.jpg" alt="...">
+  <span data-excerpt="kicker">[카테고리]</span>
+  <h3 data-excerpt="title">[그 콘텐츠 글.md 제목]</h3>
   <time data-excerpt="date" datetime="2026-10-07">2026.10.07</time>
 </a>
 ```
@@ -293,7 +293,7 @@ public/                ← 이 폴더 내용이 그대로 lxwebzine.hankyung.com
 
 ### 파일 이름
 - 영문 소문자, 숫자, 하이픈만 쓴다. 끝에 비율을 붙인다: `주제-용도-비율.jpg`
-- 예: `jeongbang-hero-16x9.jpg`, `jeongbang-hero-4x5.jpg`, `jeongbang-og.jpg`, `jeongbang-story-16x9.jpg`
+- 예: `oreum-hero-16x9.jpg`, `oreum-hero-4x5.jpg`, `oreum-og.jpg`, `saebyeol-oreum-16x9.jpg`
 - 같은 장면을 비율별로 잘라 두면 이름 앞부분은 같게, 비율만 다르게 붙인다
 
 ### 서브메인에 필요한 사진
@@ -332,7 +332,7 @@ Claude Code가 `규칙/사진정리.md`대로 `tools/photo.py`로 자른다. 학
 - 직접 찍은 사진에 휴대폰이 넣은 날짜 · 문구는 자를 때 남길 부분 밖으로 뺀다. 뺄 수 없으면 그 자리에 쓰지 않는다
 
 ### 자르기
-- 히어로는 아래쪽에 제목·CTA가 올라가므로, 주인공(폭포, 사람, 건물)을 위쪽 3분의 2 안에 둔다
+- 히어로는 아래쪽에 제목·CTA가 올라가므로, 주인공(사람, 건물, 풍경의 중심)을 위쪽 3분의 2 안에 둔다
 - 4:5 모바일 히어로는 16:9를 늘리지 말고 원본에서 따로 자른다
 - 가로 사진에서 4:5를 자르면 폭이 줄어든다 (1200×800 원본 → 640×800). 모바일 히어로 최소 600px을 넘는지 확인한다
 
@@ -345,8 +345,8 @@ Claude Code가 `규칙/사진정리.md`대로 `tools/photo.py`로 자른다. 학
 
 ```
 파일 이름 | 출처 | 라이선스 | 원본 주소
-jeongbang-hero-16x9.jpg | 직접 촬영(team1) | - | -
-jeongbang-falls-16x9.jpg | 한국관광공사 | 공공누리 제1유형 | https://...
+oreum-hero-16x9.jpg | 직접 촬영(teamN) | - | -
+saebyeol-oreum-wide-16x9.jpg | 한국관광공사 | 공공누리 제1유형 | https://...
 ```
 
 ---

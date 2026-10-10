@@ -6,15 +6,15 @@
 - 휴대폰 사진의 회전 정보를 반영하고, 위치 정보(EXIF)는 지운다
 
 사용 (Windows는 python3 대신 python):
-  python3 tools/photo.py 원본 용도 주제 [이름중간] [--focus x,y] [--credit "직접 촬영(team1)"]
+  python3 tools/photo.py 원본 용도 주제 [이름중간] [--focus x,y] [--credit "직접 촬영(teamN)"]
 
   용도: hero-16x9 | hero-4x5 | og | 16x9 | 4x5 | 9x16 | thumb-16x9
   주제·이름중간: 영문 소문자·숫자·하이픈. 파일 이름 = 주제-이름중간-비율.jpg
                  (hero·og는 이름중간을 비운다 → 주제-hero-16x9.jpg, 주제-og.jpg)
   --focus x,y  : 남길 부분의 가운데 (0~1, 왼쪽 위가 0,0). 기본 0.5,0.5
-  --credit     : 출처. 직접 찍은 사진은 "직접 촬영(team3)", 아니면 "출처 | 라이선스 | 원본 주소"
+  --credit     : 출처. 직접 찍은 사진은 "직접 촬영(teamN)", 아니면 "출처 | 라이선스 | 원본 주소"
 예:
-  python3 tools/photo.py 콘텐츠/정방폭포/사진/IMG_0101.jpg 16x9 jeongbang-story --focus 0.5,0.7
+  python3 tools/photo.py 콘텐츠/새별오름/사진/IMG_0101.jpg 16x9 saebyeol-oreum --focus 0.5,0.7
 """
 import argparse, os, re, sys
 from io import BytesIO
