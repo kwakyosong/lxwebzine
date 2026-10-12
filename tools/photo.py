@@ -13,6 +13,9 @@
                  (hero·og는 이름중간을 비운다 → 주제-hero-16x9.jpg, 주제-og.jpg)
   --focus x,y  : 남길 부분의 가운데 (0~1, 왼쪽 위가 0,0). 기본 0.5,0.5
   --credit     : 출처. 직접 찍은 사진은 "직접 촬영(teamN)", 아니면 "출처 | 라이선스 | 원본 주소"
+
+아이폰 HEIC 사진은 먼저 같은 폴더에 jpg를 만들고(원본은 그대로) 그 jpg를 쓴다:
+  python3 tools/photo.py --jpg 콘텐츠/새별오름/사진/IMG_0102.HEIC
 예:
   python3 tools/photo.py 콘텐츠/새별오름/사진/IMG_0101.jpg 16x9 saebyeol-oreum --focus 0.5,0.7
 """
@@ -23,6 +26,22 @@ try:
 except ImportError:
     sys.exit('Pillow가 없다. 한 번만 설치한다: python -m pip install pillow  (Mac은 python3 -m pip install pillow)')
 if hasattr(sys.stdout, 'reconfigure'): sys.stdout.reconfigure(encoding='utf-8')   # Windows에서도 한글 결과가 깨지지 않게
+try:
+    import pillow_heif; pillow_heif.register_heif_opener()   # 아이폰 HEIC 사진을 열 수 있게 (있을 때만)
+except ImportError:
+    pillow_heif = None
+HEIC_HELP = '아이폰 HEIC 사진이다. 한 번만 설치한다: python -m pip install pillow-heif  (Mac은 python3 -m pip install pillow-heif)'
+
+def to_jpg(src):
+    """HEIC 원본 옆에 같은 이름의 jpg를 만든다 (회전 반영, 위치 정보 없음, 원본은 그대로)"""
+    if pillow_heif is None and src.lower().endswith(('.heic', '.heif')):
+        sys.exit(HEIC_HELP)
+    dst = os.path.splitext(src)[0] + '.jpg'
+    if os.path.exists(dst):
+        sys.exit(f'이미 있다: {dst} (그 jpg를 쓴다)')
+    im = ImageOps.exif_transpose(Image.open(src)).convert('RGB')
+    im.save(dst, 'JPEG', quality=92)
+    print(f'만들었다: {dst} ({im.size[0]}×{im.size[1]})')
 
 USES = {
     'hero-16x9': dict(r=(16, 9), max=1600, min=1200, kb=500, part='hero'),
@@ -43,6 +62,8 @@ def name_for(use, topic, part):
     return '-'.join(parts) + '-' + ('x'.join(map(str, u['r']))) + '.jpg'
 
 def main():
+    if len(sys.argv) == 3 and sys.argv[1] == '--jpg':
+        return to_jpg(sys.argv[2])
     ap = argparse.ArgumentParser()
     ap.add_argument('src'); ap.add_argument('use', choices=USES); ap.add_argument('topic'); ap.add_argument('part', nargs='?', default='')
     ap.add_argument('--focus', default='0.5,0.5'); ap.add_argument('--credit', default='직접 촬영')
@@ -52,6 +73,8 @@ def main():
     name = name_for(a.use, a.topic, a.part)
     if not re.fullmatch(r'[a-z0-9]+(-[a-z0-9]+)*\.jpg', name):
         sys.exit(f'파일 이름 규칙과 다르다: {name} (영문 소문자·숫자·하이픈)')
+    if pillow_heif is None and a.src.lower().endswith(('.heic', '.heif')):
+        sys.exit(HEIC_HELP)
     im = ImageOps.exif_transpose(Image.open(a.src)).convert('RGB')
     W, H = im.size
     R = u['r'][0] / u['r'][1]
