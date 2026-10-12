@@ -1,0 +1,3 @@
+# 여럿이 동시에 /article 하면 각자 출처 목록에 줄을 더한다. pull로 합칠 때 양쪽 줄을 모두 남긴다 (CLAUDE.md 3번)
+public/images/credits.txt merge=union
+public/media/credits.txt merge=union
