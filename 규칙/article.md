@@ -203,7 +203,7 @@
 - `<title>`(기사 제목 | 웹진 이름), `<meta name="description">`(요약)
 - 공유 미리보기(OG): `og:type` `article`, 제목·요약·이미지. 이미지는 그 기사의 대표 사진(대표 또는 대표(PC), 16:9)을 쓴다. 이 주소만 실제 주소(`https://lxwebzine.hankyung.com/teamN/images/...`)로 쓴다
 - 대표 주소(canonical): `https://lxwebzine.hankyung.com/teamN/articles/기사이름.html`
-- 한경 측정 코드 유지(삭제·수정 금지), 팀 GTM 코드 (`우리웹진.md` 측정 칸의 아이디로 `규칙/공통틀.md` 7번대로. 비어 있으면 자리 주석만)
+- 팀 GTM 코드 (`우리웹진.md` 측정 칸의 아이디로 `규칙/공통틀.md` 7번대로. 비어 있으면 자리 주석만)
 - 클릭 추적 이름표: `data-track="article_cta"`, `"related_article"`, `"back_to_submain"`, `"share_copy"`. 카드뉴스형은 `"card_next"`, `"card_prev"` 추가. 영상 재생은 `"video_play"`
 - 사진마다 대체 텍스트(alt), 명도 대비 4.5:1 이상
 - 서브메인 기사 카드는 /submain이 만든다 (/article은 이 콘텐츠의 파일만. 서브메인 md의 발췌 표시 규칙대로)
