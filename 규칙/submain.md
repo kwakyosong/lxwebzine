@@ -164,7 +164,7 @@ public/                ← 이 폴더 내용이 그대로 lxwebzine.hankyung.com
 - `<title>`, `<meta name="description">`
 - 공유 미리보기(OG) 제목·설명·이미지. 이미지는 1200×630 `이름-og.jpg`. 이 주소만 실제 주소(`https://lxwebzine.hankyung.com/teamN/images/이름-og.jpg`)로 쓴다
 - 대표 주소(canonical): `https://lxwebzine.hankyung.com/teamN/`
-- 한경 측정 코드 유지 (삭제·수정 금지), 팀 GTM 코드
+- 한경 측정 코드 유지 (삭제·수정 금지), 팀 GTM 코드 (`우리웹진.md` 측정 칸의 아이디로 `규칙/공통틀.md` 7번대로. 비어 있으면 자리 주석만)
 - 클릭 추적 이름표
   - 히어로 CTA: `data-track="hero_cta"`
   - 하단 고정 CTA: `data-track="sticky_cta"`
